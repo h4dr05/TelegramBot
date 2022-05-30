@@ -5,6 +5,7 @@ class BooksDatabase(pymongo.MongoClient):
     """
     Wrapper for pymongo.
     """
+
     URI = "mongodb://localhost:27017"
 
     def __init__(self, credential_path=".credentials"):
