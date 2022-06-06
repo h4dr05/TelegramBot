@@ -1,4 +1,5 @@
 import pymongo
+import pprint
 
 
 class BooksDatabase(pymongo.MongoClient):
@@ -29,6 +30,27 @@ class BooksDatabase(pymongo.MongoClient):
 
         super().__init__(BooksDatabase.URI, username=username,
                          password=password, authSource=authdb)
+        super().__init__(BooksDatabase.URI)
 
-        self.archives_db = self["Archives"]
-        self.books_collection = self.archives_db["Books"]
+        self.archives_db = self["Archive"]
+        self.books_collection = self.archives_db["NewBooks"]
+
+    #
+    def find_book_by_title(self, query):
+        query_result = self.books_collection.find({"title": {"$regex": query, "$options": "-ig"}})
+        return list(query_result)
+
+    def find_book_by_author(self, query):
+        query_result = self.books_collection.find({"authors": {"$regex": query, "$options": "-i"}})
+        return list(query_result)
+
+    def find_book_by_description(self, query):
+        query_result = self.books_collection.find({"longDescription": {"$regex": query, "$options": "-i"}})
+        return list(query_result)
+
+
+def run_db():
+    database = BooksDatabase()
+    pprint.pprint(database.find_book_by_author("Bruno Lowagie"))
+
+
