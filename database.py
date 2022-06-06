@@ -1,5 +1,6 @@
 import pymongo
 import pprint
+from enum import Enum
 
 
 class BooksDatabase(pymongo.MongoClient):
@@ -9,7 +10,15 @@ class BooksDatabase(pymongo.MongoClient):
 
     URI = "mongodb://localhost:27017"
 
-    def __init__(self, credential_path=".credentials"):
+    class SearchMode(Enum):
+        TITLE = 1
+        AUTHOR = 2
+        DESCRIPTION = 3
+    TITLE = SearchMode.TITLE
+    AUTHOR = SearchMode.AUTHOR
+    DESCRIPTION = SearchMode.DESCRIPTION
+
+    def __init__(self, credential_path=".credentials") -> None:
         """
         Initialize the database connection.
         """
@@ -30,27 +39,25 @@ class BooksDatabase(pymongo.MongoClient):
 
         super().__init__(BooksDatabase.URI, username=username,
                          password=password, authSource=authdb)
-        super().__init__(BooksDatabase.URI)
 
         self.archives_db = self["Archive"]
         self.books_collection = self.archives_db["NewBooks"]
 
-    #
-    def find_book_by_title(self, query):
-        query_result = self.books_collection.find({"title": {"$regex": query, "$options": "-ig"}})
-        return list(query_result)
-
-    def find_book_by_author(self, query):
-        query_result = self.books_collection.find({"authors": {"$regex": query, "$options": "-i"}})
-        return list(query_result)
-
-    def find_book_by_description(self, query):
-        query_result = self.books_collection.find({"longDescription": {"$regex": query, "$options": "-i"}})
-        return list(query_result)
+    ### Search Method ###
+    def find_book(self, query, mode: SearchMode) -> pymongo.cursor.Cursor:
+        match mode:
+            case self.TITLE:
+                return self.books_collection.find(
+                    {"title": {"$regex": query, "$options": "-i"}})
+            case self.AUTHOR:
+                return self.books_collection.find(
+                    {"authors": {"$regex": query, "$options": "-i"}})
+            case self.DESCRIPTION:
+                return self.books_collection.find({"longDescription": {"$regex": query, "$options": "-i"}})
+            case _:
+                raise Exception(f"Invalid search mode: {mode}")
 
 
 def run_db():
     database = BooksDatabase()
     pprint.pprint(database.find_book_by_author("Bruno Lowagie"))
-
-
