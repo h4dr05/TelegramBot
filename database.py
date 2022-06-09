@@ -53,7 +53,8 @@ class BooksDatabase(pymongo.MongoClient):
                 return self.books_collection.find(
                     {"authors": {"$regex": query, "$options": "-i"}})
             case self.DESCRIPTION:
-                return self.books_collection.find({"longDescription": {"$regex": query, "$options": "-i"}})
+                return self.books_collection.find({"longDescription": {"$regex": query, "$options": "-i"}, 
+                                                "shortDescription": {"$regex": query, "$options": "-i"}})
             case _:
                 raise Exception(f"Invalid search mode: {mode}")
 
