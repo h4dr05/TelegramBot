@@ -45,20 +45,16 @@ class BooksDatabase(pymongo.MongoClient):
 
     ### Search Method ###
     def find_book(self, query, mode: SearchMode) -> pymongo.cursor.Cursor:
+        # query = "\\b" + query + "\\b"
         match mode:
             case self.TITLE:
                 return self.books_collection.find(
-                    {"title": {"$regex": query, "$options": "-i"}})
+                    {"title": {"$regex": "\\b"+query+"\\b\\s", "$options": "-i"}})
             case self.AUTHOR:
                 return self.books_collection.find(
-                    {"authors": {"$regex": query, "$options": "-i"}})
+                    {"authors": {"$regex": "\\b"+query+"\\b\\s", "$options": "-i"}})
             case self.DESCRIPTION:
-                return self.books_collection.find({"longDescription": {"$regex": query, "$options": "-i"}, 
-                                                "shortDescription": {"$regex": query, "$options": "-i"}})
+                return self.books_collection.find({"longDescription": {"$regex": "\\b"+query+"\\b\\s", "$options": "-i"}, 
+                                                "shortDescription": {"$regex": "\\b"+query+"\\b\\s", "$options": "-i"}})
             case _:
                 raise Exception(f"Invalid search mode: {mode}")
-
-
-def run_db():
-    database = BooksDatabase()
-    pprint.pprint(database.find_book_by_author("Bruno Lowagie"))
