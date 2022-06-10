@@ -3,6 +3,7 @@ from telegram import Update, ReplyKeyboardMarkup, KeyboardButton, InlineKeyboard
 from telegram.ext import Updater, MessageHandler, Filters, CallbackContext, CallbackQueryHandler
 from database import BooksDatabase
 import pprint
+from object import returnJson
 
 class Bot(telegram.ext.Updater):
     def __init__(self, token, base_url="https://api.telegram.org/bot", use_context=True):
@@ -35,7 +36,8 @@ class Bot(telegram.ext.Updater):
     def echo(self, update: Update, context: CallbackContext):
         d = list(self.database.find_book(update.message.text, self.database.TITLE))
         pprint.pprint(d)
-        context.bot.send_message(chat_id=update.effective_chat.id, text=update.message.text)
+        normStrokaEpt = returnJson(list(d))
+        context.bot.send_message(chat_id=update.effective_chat.id, text=normStrokaEpt)
         
 
     # def queryHandler(self, update:Update, context: CallbackContext):
