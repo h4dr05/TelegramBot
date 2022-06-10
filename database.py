@@ -1,3 +1,4 @@
+from typing import List
 import pymongo
 import pprint
 from enum import Enum
@@ -14,6 +15,7 @@ class BooksDatabase(pymongo.MongoClient):
         TITLE = 1
         AUTHOR = 2
         DESCRIPTION = 3
+
     TITLE = SearchMode.TITLE
     AUTHOR = SearchMode.AUTHOR
     DESCRIPTION = SearchMode.DESCRIPTION
@@ -35,10 +37,14 @@ class BooksDatabase(pymongo.MongoClient):
                 authdb = credentials[2].split("=")[1]
             except IndexError:
                 raise Exception(
-                    f"Invalid credentials file format, please double check that it is filled out and the correct path was passed in (given: {credential_path}).")
+                    f"Invalid credentials file format, please double check \
+                    that it is filled out and the correct path was passed in \
+                    (given: {credential_path})."
+                )
 
-        super().__init__(BooksDatabase.URI, username=username,
-                         password=password, authSource=authdb)
+        super().__init__(
+            BooksDatabase.URI, username=username, password=password, authSource=authdb
+        )
 
         self.archives_db = self["Archive"]
         self.books_collection = self.archives_db["NewBooks"]
@@ -49,12 +55,37 @@ class BooksDatabase(pymongo.MongoClient):
         match mode:
             case self.TITLE:
                 return self.books_collection.find(
-                    {"title": {"$regex": "\\b"+query+"\\b\\s", "$options": "-i"}})
+                    {"title": {"$regex": "\\b" + query + "\\b\\s", "$options": "-i"}}
+                )
             case self.AUTHOR:
                 return self.books_collection.find(
-                    {"authors": {"$regex": "\\b"+query+"\\b\\s", "$options": "-i"}})
+                    {"authors": {"$regex": "\\b" + query + "\\b\\s", "$options": "-i"}}
+                )
             case self.DESCRIPTION:
-                return self.books_collection.find({"longDescription": {"$regex": "\\b"+query+"\\b\\s", "$options": "-i"}, 
-                                                "shortDescription": {"$regex": "\\b"+query+"\\b\\s", "$options": "-i"}})
+                return self.books_collection.find(
+                    {
+                        "longDescription": {
+                            "$regex": "\\b" + query + "\\b\\s",
+                            "$options": "-i",
+                        },
+                        "shortDescription": {
+                            "$regex": "\\b" + query + "\\b\\s",
+                            "$options": "-i",
+                        },
+                    }
+                )
             case _:
                 raise Exception(f"Invalid search mode: {mode}")
+
+    def to_string(self, lst: List) -> str:
+        string = ""
+
+        if not lst:
+            string = "No matches :("  # none
+        elif len(lst) == 1:
+            string += f"{list[0].title}\n{list[0].description}"
+        else:
+            for book in lst:
+                string += f"{book.title}\n"
+        # print(string)
+        return string
