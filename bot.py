@@ -15,7 +15,6 @@ from telegram.ext import (
 )
 from database import BooksDatabase
 import pprint
-from object import returnJson
 
 
 class Bot(telegram.ext.Updater):
@@ -54,7 +53,7 @@ class Bot(telegram.ext.Updater):
     def echo(self, update: Update, context: CallbackContext):
         d = list(self.database.find_book(update.message.text, self.database.TITLE))
         pprint.pprint(d)
-        norm_stroka_ept = returnJson(list(d))
+        norm_stroka_ept = self.database.to_string(list(d))
         context.bot.send_message(chat_id=update.effective_chat.id, text=norm_stroka_ept)
 
     # def queryHandler(self, update:Update, context: CallbackContext):
