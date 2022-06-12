@@ -83,9 +83,10 @@ class BooksDatabase(pymongo.MongoClient):
         if not lst:
             string = "No matches :("  # none
         elif len(lst) == 1:
-            string += f"{list[0].title}\n{list[0].description}"
+            string += f"{lst[0]['title']}\n{lst[0]['authors']}"
         else:
             for book in lst:
-                string += f"{book.title}\n"
+                string += f"{book['title']}\n"
+                string += f"{lst[0]['title']}\n{lst[0]['authors']}"
         # print(string)
         return string
