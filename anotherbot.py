@@ -24,16 +24,16 @@ def handler(call: types.CallbackQuery):
         case 'Search':
             mainmenu(call.message)
         case 'By title':
-            msg = bot.send_message(call.message.chat.id, 'Type book name', reply_markup=keyboard)
+            msg = bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.id, text='Type book name', reply_markup=keyboard)
             # searchbytitle(call.message, call.data)
             bot.register_next_step_handler(msg, searchbytitle)
             return
         case 'By description':
-            msg = bot.send_message(call.message.chat.id, 'Type book desc', reply_markup=keyboard)
+            msg = bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.id, text='Type book desc', reply_markup=keyboard)
             bot.register_next_step_handler(msg, searchbydescription)
             return
         case 'By author':
-            msg = bot.send_message(call.message.chat.id, 'Type book author', reply_markup=keyboard)
+            msg = bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.id, text='Type book author', reply_markup=keyboard)
             bot.register_next_step_handler(msg, searchbyauthor)
             return
         case 'Cancel':
@@ -49,7 +49,7 @@ def mainmenu(message):
     keyboard.row(types.InlineKeyboardButton('By title', callback_data='By title'),
                  types.InlineKeyboardButton('By description', callback_data='By description'),
                  types.InlineKeyboardButton('By author', callback_data='By author'))
-    msg = bot.send_message(message.chat.id, 'Choose the search method', reply_markup=keyboard)
+    msg = bot.edit_message_text(chat_id=message.chat.id, message_id=message.id, text='Choose the search method', reply_markup=keyboard)
 
 
 # def findBook(call: types.CallbackQuery):
