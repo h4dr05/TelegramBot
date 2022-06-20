@@ -1,6 +1,5 @@
 from typing import List
 import pymongo
-import pprint
 from enum import Enum
 
 
@@ -15,10 +14,12 @@ class BooksDatabase(pymongo.MongoClient):
         TITLE = 1
         AUTHOR = 2
         DESCRIPTION = 3
+        NOTES = 4
 
     TITLE = SearchMode.TITLE
     AUTHOR = SearchMode.AUTHOR
     DESCRIPTION = SearchMode.DESCRIPTION
+    NOTES = SearchMode.NOTES
 
     def __init__(self, credential_path=".credentials") -> None:
         """
@@ -74,8 +75,18 @@ class BooksDatabase(pymongo.MongoClient):
                         },
                     }
                 )
+            case self.NOTES:
+                return self.books_collection.find(
+                    {"notes": {"$regex": "\\b" + query + "\\b\\s", "$options": "-i"}}
+                )
             case _:
                 raise Exception(f"Invalid search mode: {mode}")
+
+    def insert_note(self, book_title: str, note: str) -> bool:
+        res = self.books_collection.update_one(
+            {"title": book_title}, {"$push": {"notes": note}}
+        )
+        return res.modified_count == 1
 
     def to_string(self, lst: List) -> str:
         string = ""
