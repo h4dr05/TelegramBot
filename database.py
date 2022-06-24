@@ -52,33 +52,35 @@ class BooksDatabase(pymongo.MongoClient):
 
     ### Search Method ###
     def find_book(self, query, mode: SearchMode) -> pymongo.cursor.Cursor:
-        # query = "\\b" + query + "\\b"
+        query = "\\b" + query + "\\b"
         match mode:
             case self.TITLE:
                 return self.books_collection.find(
-                    {"title": {"$regex": "\\b" + query + "\\b\\s", "$options": "-i"}}
+                    {"title": {"$regex": query, "$options": "-i"}}
                 )
+
             case self.AUTHOR:
                 return self.books_collection.find(
-                    {"authors": {"$regex": "\\b" + query + "\\b\\s", "$options": "-i"}}
+                    {"authors": {"$regex": query, "$options": "-i"}}
                 )
+
             case self.DESCRIPTION:
                 return self.books_collection.find(
                     {
-                        "longDescription": {
-                            "$regex": "\\b" + query + "\\b\\s",
-                            "$options": "-i",
-                        },
-                        "shortDescription": {
-                            "$regex": "\\b" + query + "\\b\\s",
-                            "$options": "-i",
-                        },
+                        "$or": [
+                            {"longDescription": {"$regex": query, "$options": "-i"}},
+                            {"shortDescription": {"$regex": query, "$options": "-i"}},
+                        ]
                     }
                 )
+
             case self.NOTES:
                 return self.books_collection.find(
-                    {"notes": {"$regex": "\\b" + query + "\\b\\s", "$options": "-i"}}
+                    {
+                        {"notes": {"$regex": query, "$options": "-i"}},
+                    }
                 )
+
             case _:
                 raise Exception(f"Invalid search mode: {mode}")
 
@@ -99,5 +101,4 @@ class BooksDatabase(pymongo.MongoClient):
             for book in lst:
                 string += f"{book['title']}\n"
                 string += f"{lst[0]['title']}\n{lst[0]['authors']}"
-        # print(string)
         return string

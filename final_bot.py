@@ -49,9 +49,9 @@ CURRENT_BOOK = {}
 
 @app.on_message(filters.private & filters.command("start"))
 async def begin(client: Client, message: Message):
-    button = [[InlineKeyboardButton("Search", callback_data="search")]]
+    button = [[InlineKeyboardButton("Начать поиск", callback_data="search")]]
     await message.reply_text(
-        "Click search to search", reply_markup=InlineKeyboardMarkup(button)
+        "Для начала взаимодействия с архивом нажмите кнопку «Начать поиск»", reply_markup=InlineKeyboardMarkup(button)
     )
 
 
@@ -80,7 +80,7 @@ async def parse(client: Client, message: Message):
             query = message.text
             res = database.insert_note(CURRENT_BOOK["title"], query)
             if not res:
-                await message.reply_text("Failed to add note")
+                await message.reply_text("Ошибка при добавлении заметки")
                 return
 
     if STATE in [
@@ -95,18 +95,18 @@ async def parse(client: Client, message: Message):
         keyboard = InlineKeyboard()
         keyboard.paginate(len(FOUND), INDEX + 1, "pagination_keyboard:{number}")
         keyboard.row(
-            InlineButton("Detailed Book Info", "pagination_detail"),
-            InlineButton("Add a Note", "add_note"),
+            InlineButton("Детальная информация о книге", "pagination_detail"),
+            InlineButton("Добавить заметку", "add_note"),
         )
         await message.reply_text(f"{CURRENT_BOOK.get('title')}", reply_markup=keyboard)
     elif STATE == State.ADD_NOTE:
         keyboard = InlineKeyboard()
         keyboard.row(
-            InlineButton("Back to Detailed Book Info", "pagination_detail"),
-            InlineButton("Add another Note", "add_note"),
+            InlineButton("Вернуться к детальной информации о книге", "pagination_detail"),
+            InlineButton("Добавить другую заметку", "add_note"),
         )
         await message.reply_text(
-            f"Your note ({query}) was added!", reply_markup=keyboard
+            f"Ваша заметка ({query}) была успешно добавлена!", reply_markup=keyboard
         )
 
 
@@ -118,24 +118,24 @@ async def callback_query(client: Client, callback_query: CallbackQuery):
         case "search":
             markup = search_menu()
             await callback_query.message.edit(
-                "Choose a method to search by", reply_markup=markup
+                "Выберите метод поиска книги", reply_markup=markup
             )
             STATE = State.SEARCH
 
         case "search_title":
-            await callback_query.message.edit("Enter book title")
+            await callback_query.message.edit("Введите название книги")
             STATE = State.SEARCH_BOOK_TITLE
 
         case "search_author":
-            await callback_query.message.edit("Enter book author")
+            await callback_query.message.edit("Введите автора книги")
             STATE = State.SEARCH_BOOK_AUTHOR
 
         case "search_description":
-            await callback_query.message.edit("Enter book description")
+            await callback_query.message.edit("Введите автора книги")
             STATE = State.SEARCH_BOOK_DESCRIPTION
 
         case "search_notes":
-            await callback_query.message.edit("Enter book notes")
+            await callback_query.message.edit("Введите ключевые слова из заметки")
             STATE = State.SEARCH_BOOK_NOTES
 
         case "pagination_detail":
@@ -146,7 +146,7 @@ async def callback_query(client: Client, callback_query: CallbackQuery):
                 book_str += f"""\nPublished Date: {published_date}"""
             if description := book.get("shortDescription"):
                 book_str += f"""\nDescription: {description}"""
-            if authors := book.get("author"):
+            if authors := book.get("authors"):
                 book_str += f"""\nAuthor: {", ".join(authors)}"""
             if categories := book.get("categories"):
                 book_str += f"""\nCategories: {", ".join(categories)}"""
@@ -157,12 +157,12 @@ async def callback_query(client: Client, callback_query: CallbackQuery):
 
             keyboard = InlineKeyboard()
             keyboard.row(
-                InlineButton("Add a Note", "add_note"),
-                InlineButton("Back to Results", "back_results"),
+                InlineButton("Добавить заметку", "add_note"),
+                InlineButton("Возврат к результатам", "back_results"),
             )
 
             if hasattr(book, "longDescription"):
-                keyboard.row.add(InlineButton("Show more info", callback_data="more"))
+                keyboard.row.add(InlineButton("Показать больше информации", callback_data="more"))
 
             await callback_query.message.edit(book_str, reply_markup=keyboard)
 
@@ -172,8 +172,8 @@ async def callback_query(client: Client, callback_query: CallbackQuery):
             keyboard = InlineKeyboard()
             keyboard.paginate(len(FOUND), INDEX + 1, "pagination_keyboard:{number}")
             keyboard.row(
-                InlineButton("Detailed Book Info", "pagination_detail"),
-                InlineButton("Add a Note", "add_note"),
+                InlineButton("Детальная информация о книге", "pagination_detail"),
+                InlineButton("Добавить заметку", "add_note"),
             )
             await callback_query.message.edit(
                 f"{FOUND[int(callback_query.data.split(':')[1]) - 1].get('title')}",
@@ -182,7 +182,7 @@ async def callback_query(client: Client, callback_query: CallbackQuery):
 
         case "add_note":
             await callback_query.message.edit(
-                f"Enter a note to insert for `{CURRENT_BOOK.get('title')}`"
+                f"Введите заметку, чтобы добавить её для книги `{CURRENT_BOOK.get('title')}`"
             )
             STATE = State.ADD_NOTE
 
@@ -190,8 +190,8 @@ async def callback_query(client: Client, callback_query: CallbackQuery):
             keyboard = InlineKeyboard()
             keyboard.paginate(len(FOUND), INDEX + 1, "pagination_keyboard:{number}")
             keyboard.row(
-                InlineButton("Detailed Book Info", "pagination_detail"),
-                InlineButton("Add a Note", "add_note"),
+                InlineButton("Детальная информация о книге", "pagination_detail"),
+                InlineButton("Добавить заметку", "add_note"),
             )
             await callback_query.message.edit(
                 f"{FOUND[INDEX].get('title')}",
@@ -199,15 +199,15 @@ async def callback_query(client: Client, callback_query: CallbackQuery):
             )
 
         case _:
-            await callback_query.message.reply("Something went wrong")
+            await callback_query.message.reply("Что-то пошло не так. Попробуйте заново")
 
 
 def search_menu() -> InlineKeyboardMarkup:
     button = [
-        [InlineKeyboardButton("By title", callback_data="search_title")],
-        [InlineKeyboardButton("By author", callback_data="search_author")],
-        [InlineKeyboardButton("By description", callback_data="search_description")],
-        [InlineKeyboardButton("By notes", callback_data="search_notes")],
+        [InlineKeyboardButton("По названию", callback_data="search_title")],
+        [InlineKeyboardButton("По автору", callback_data="search_author")],
+        [InlineKeyboardButton("По описанию", callback_data="search_description")],
+        [InlineKeyboardButton("По заметкам", callback_data="search_notes")],
     ]
     return InlineKeyboardMarkup(button)
 
