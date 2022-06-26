@@ -76,9 +76,7 @@ class BooksDatabase(pymongo.MongoClient):
 
             case self.NOTES:
                 return self.books_collection.find(
-                    {
-                        {"notes": {"$regex": query, "$options": "-i"}},
-                    }
+                    {"notes": {"$regex": query, "$options": "-iu"}}
                 )
 
             case _:
@@ -89,16 +87,3 @@ class BooksDatabase(pymongo.MongoClient):
             {"title": book_title}, {"$push": {"notes": note}}
         )
         return res.modified_count == 1
-
-    def to_string(self, lst: List) -> str:
-        string = ""
-
-        if not lst:
-            string = "No matches :("  # none
-        elif len(lst) == 1:
-            string += f"{lst[0]['title']}\n{lst[0]['authors']}"
-        else:
-            for book in lst:
-                string += f"{book['title']}\n"
-                string += f"{lst[0]['title']}\n{lst[0]['authors']}"
-        return string

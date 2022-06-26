@@ -205,7 +205,7 @@ async def callback_query(client: Client, callback_query: CallbackQuery):
             await callback_query.message.reply("Что-то пошло не так. Попробуйте заново")
 
 
-def search_menu(daemon=True) -> InlineKeyboardMarkup:
+def search_menu() -> InlineKeyboardMarkup:
     button = [
         [InlineKeyboardButton("По названию", callback_data="search_title")],
         [InlineKeyboardButton("По автору", callback_data="search_author")],
